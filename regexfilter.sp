@@ -21,6 +21,72 @@ new Handle:NameREGEXList = INVALID_HANDLE;
 
 new Handle:ClientLimits[33];
 
+new String:CTagLong[][] = {
+	"{default}",
+	"{darkred}",
+	"{purple}",
+	"{green}",
+	"{olive}",
+	"{lime}",
+	"{lightred}",
+	"{grey}",
+	"{yellow}",
+	"{bluegrey}",
+	"{lightblue}",
+	"{darkblue}",
+	"{grey2}",
+	"{orchid}",
+	"{lightred2}",  
+	"{orange}"
+};
+
+new String:CTag[][] = {
+	"{01}", //White
+	"{02}",
+	"{03}",
+	"{04}",
+	"{05}",
+	"{06}",
+	"{07}",
+	"{08}",
+	"{09}",
+	"{0A}",
+	"{0B}",
+	"{0C}",
+	"{0D}",
+	"{0E}",
+	"{0F}",
+	"{10}"
+};
+
+new String:CTagCode[][] = {
+	"\x01",
+	"\x02",
+	"\x03",
+	"\x04",
+	"\x05",
+	"\x06",
+	"\x07",
+	"\x08",
+	"\x09",
+	"\x0A",
+	"\x0B",
+	"\x0C",
+	"\x0D",
+	"\x0E",
+	"\x0F",
+	"\x10"
+};
+
+new String:messagePrefix[] = " \x01[\x02AUTO\x01]";
+
+stock CFormat(String:szMessage[], maxlength) {
+	for(new c = 0; c < sizeof(CTagCode); c++) {
+		ReplaceString(szMessage, maxlength, CTagLong[c], CTagCode[c]);
+		ReplaceString(szMessage, maxlength, CTag[c], CTagCode[c]);
+	}
+}
+
 public OnPluginStart()
 {
 	CvarEnable = CreateConVar("regexfilter_enable","1","REGEXFILTER Enabled",FCVAR_PLUGIN|FCVAR_REPLICATED|FCVAR_NOTIFY);
@@ -107,8 +173,13 @@ public Action:Command_SayHandle(client, args)
 			
 			if(GetTrieString(CurrInfo, "warn", strval, sizeof(strval) ))
 			{
-				if(!client) PrintToServer("[RegexFilter] %s",strval);
-				else PrintToChat(client, "[RegexFilter] %s",strval);
+				// Parse color tags
+				CFormat(strval, sizeof(strval));
+				if(!client) {
+					PrintToServer("%s %s", messagePrefix, strval);
+				} else {
+					PrintToChat(client, "%s %s", messagePrefix, strval);
+				}
 			}
 			
 			if(GetTrieString(CurrInfo, "action", strval, sizeof(strval) ))
